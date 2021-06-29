@@ -1,0 +1,9 @@
+[submodule "backend"]
+	path = aecb-backend
+	url = https://github.com/snvc00/aecb-backend.git
+[submodule "frontend"]
+	path = aecb-frontend
+	url = https://github.com/snvc00/aecb-frontend.git
+[submodule "external-api"]
+	path = aecb-external-api
+	url = https://github.com/snvc00/aecb-external-api.git
