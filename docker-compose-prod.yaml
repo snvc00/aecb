@@ -1,0 +1,46 @@
+version: "3.8"
+services: 
+    backend:
+        image: snvc00/aecb-backend:production
+        container_name: aecb-backend
+        build: 
+            context: ./aecb-backend/
+            dockerfile: ./aecb-backend/production.dockerfile
+        volumes: 
+            - media:/var/www/media
+        env_file: 
+            - ./aecb-backend/.env
+        ports: 
+            - "8000:8000"
+        depends_on: 
+            - postgres
+        restart: on-failure
+    frontend:
+        image: snvc00/aecb-frontend:production
+        container_name: aecb-production
+        build: 
+            context: ./aecb-frontend/
+            dockerfile: ./aecb-frontend/production.dockerfile
+        env_file: 
+            - ./aecb-frontend/.env
+        ports: 
+            - "80:80"
+        depends_on: 
+            - backend
+        restart: on-failure
+    external-api:
+        image: snvc00/aecb-external-api:production
+        container_name: aecb-external-api
+        build: 
+            context: ./aecb-external-api/
+            dockerfile: ./aecb-external-api/production.dockerfile
+        restart: on-failure
+    postgres:
+        image: postgres:9.6.21-alpine
+        container_name: aecb-postgres
+        env_file: 
+            - ./aecb-backend/.postgres.env
+        command: -c listen_addresses=aecb-backend
+volumes:
+    media:
+    db: 
