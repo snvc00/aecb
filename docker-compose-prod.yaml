@@ -5,24 +5,39 @@ services:
         container_name: aecb-backend
         build: 
             context: ./aecb-backend/
-            dockerfile: ./aecb-backend/production.dockerfile
+            dockerfile: ./production.dockerfile
         volumes: 
-            - media:/var/www/media
+            - prod-aecb-media:/var/www/media
         env_file: 
             - ./aecb-backend/.env
-        ports: 
-            - "8000:8000"
         depends_on: 
             - postgres
         restart: on-failure
+    backend-proxy:
+        image: snvc00/aecb-backend-proxy:latest
+        container_name: aecb-backend-proxy
+        build: 
+            context: ./aecb-backend/
+            dockerfile: ./proxy.dockerfile
+        volumes: 
+            - prod-aecb-media:/var/www/media
+        environment: 
+            NGINX_PORT: 8001
+            BACKEND_HOST: aecb-backend
+            BACKEND_PORT: 8000
+        ports: 
+            - "8000:8001"
+        depends_on:
+            - backend
+        restart: on-failure
     frontend:
         image: snvc00/aecb-frontend:production
-        container_name: aecb-production
+        container_name: aecb-frontend
         build: 
             context: ./aecb-frontend/
-            dockerfile: ./aecb-frontend/production.dockerfile
-        env_file: 
-            - ./aecb-frontend/.env
+            dockerfile: ./production.dockerfile
+        environment: 
+            NGINX_PORT: 80
         ports: 
             - "80:80"
         depends_on: 
@@ -33,14 +48,16 @@ services:
         container_name: aecb-external-api
         build: 
             context: ./aecb-external-api/
-            dockerfile: ./aecb-external-api/production.dockerfile
+            dockerfile: ./production.dockerfile
         restart: on-failure
     postgres:
         image: postgres:9.6.21-alpine
         container_name: aecb-postgres
+        volumes:
+            - prod-aecb-db:/var/lib/postgresql/data
         env_file: 
             - ./aecb-backend/.postgres.env
-        command: -c listen_addresses=aecb-backend
+        command: -c listen_addresses=*
 volumes:
-    media:
-    db: 
+    prod-aecb-media:
+    prod-aecb-db: 
